@@ -12,11 +12,17 @@
 
     <textarea id="fileContents" rows="30" cols="50" hidden></textarea>
 
-    <h1>Todo</h1>
-    <ul id="todoList"></ul>
+    <div class="board">
+      <div id="todoDrop" class="drop-zone">
+        <h1>Todo</h1>
+        <ul id="todoList" class="lane"></ul>
+      </div>
 
-    <h1>Done</h1>
-    <ul id="doneList"></ul>
+      <div id="doneDrop" class="drop-zone">
+        <h1>Done</h1>
+        <ul id="doneList" class="lane"></ul>
+      </div>
+    </div>
 
     <script type="module" src="script.js"></script>
   </body>

@@ -1,4 +1,26 @@
-html, body {
+html,
+body {
+  box-sizing: border-box;
   height: 100%;
   width: 100%;
+  padding: 3px;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.drop-zone {
+  border-radius: 3px;
+  padding: 5px 10px;
+  border: 2px solid #fff;
+}
+
+.drop-zone.over {
+  border: 2px dashed #333;
+}
+
+.lane li {
+  cursor: move;
 }
