@@ -1,9 +1,16 @@
-html,
-body {
+p {
+  padding: 0;
+  margin: 0;
+}
+
+.wrapper {
   box-sizing: border-box;
-  height: 100%;
-  width: 100%;
   padding: 3px;
+}
+
+.headings-select-box {
+  float: right;
+  padding-right: 3px;
 }
 
 .board {

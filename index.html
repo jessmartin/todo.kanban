@@ -8,22 +8,29 @@
   </head>
 
   <body>
-    <button id="butOpenFile">Open File</button>
+    <div class="wrapper">
+      <p class="headings-select-box">
+        Limit to todos under heading:
+        <select id="headingsSelect" size="1"></select>
+      </p>
 
-    <textarea id="fileContents" rows="30" cols="50" hidden></textarea>
+      <p><button id="butOpenFile">Open File</button></p>
 
-    <div class="board">
-      <div id="todoDrop" class="drop-zone">
-        <h1>Todo</h1>
-        <ul id="todoList" class="lane"></ul>
+      <textarea id="fileContents" rows="30" cols="50" hidden></textarea>
+
+      <div class="board">
+        <div id="todoDrop" class="drop-zone">
+          <h1>Todo</h1>
+          <ul id="todoList" class="lane"></ul>
+        </div>
+
+        <div id="doneDrop" class="drop-zone">
+          <h1>Done</h1>
+          <ul id="doneList" class="lane"></ul>
+        </div>
       </div>
 
-      <div id="doneDrop" class="drop-zone">
-        <h1>Done</h1>
-        <ul id="doneList" class="lane"></ul>
-      </div>
+      <script type="module" src="script.js"></script>
     </div>
-
-    <script type="module" src="script.js"></script>
   </body>
 </html>

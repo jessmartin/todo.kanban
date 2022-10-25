@@ -13,6 +13,8 @@ butOpenFile.addEventListener('click', async () => {
 let file;
 let fileLastModified = 0;
 let mdAst;
+let headingLimiter = 0;
+
 const drawTodos = async () => {
   file = await fileHandle.getFile();
   if (file.lastModified === fileLastModified) return;
@@ -32,7 +34,6 @@ const drawTodos = async () => {
 
   const todos = getAllTodos(mdAst);
   todos.forEach((item) => {
-    console.log(item);
     const listItem = document.createElement('li');
     listItem.draggable = true;
     listItem.textContent = item.children[0].children[0].value;
@@ -49,8 +50,33 @@ const drawTodos = async () => {
     }
   });
 
-  const headings = getAllHeadings(mdAst);
+  // Populate the headings select box
+  headingsSelect.innerHTML = '';
 
+  const allHeadersOptions = document.createElement('option');
+  allHeadersOptions.value = 'all';
+  allHeadersOptions.textContent = 'All Headings';
+  headingsSelect.appendChild(allHeadersOptions);
+
+  const headings = getAllHeadings(mdAst);
+  headings.forEach((heading) => {
+    const option = document.createElement('option');
+    option.value = heading.position.start.line;
+    option.textContent = heading.children[0].value;
+    headingsSelect.appendChild(option);
+  });
+  headingsSelect.addEventListener('change', headingsSelectChanged);
+};
+
+const headingsSelectChanged = (e) => {
+  const headingLineNumber = e.target.value;
+  if (headingLineNumber === 'all') {
+    headingLimiter = 0;
+  } else {
+    headingLimiter = headingLineNumber;
+  }
+  console.log("heading limiter", headingLimiter);
+  drawTodos();
 };
 
 const getAllHeadings = (mdAst) => {
@@ -63,9 +89,10 @@ const getAllHeadings = (mdAst) => {
   return headings;
 };
 
-// recursively find all the todo items in the markdown AST
+
 const getAllTodos = (mdAst) => {
-  const todos = [];
+  let todos = [];
+
   const findTodos = (node) => {
     if (node.type === 'listItem') {
       if (node.checked !== null) {
@@ -76,7 +103,18 @@ const getAllTodos = (mdAst) => {
       node.children.forEach(findTodos);
     }
   }
-  mdAst.children.forEach(findTodos);
+
+  if (headingLimiter > 0) {
+    console.log('heading limiter', headingLimiter);
+    const focusedHeading = mdAst.children.forEach((node) => {
+      if (node.position.start.line == headingLimiter) {
+        return node;
+      }
+    });
+    focusedHeading.children.forEach(findTodos);
+  } else {
+    mdAst.children.forEach(findTodos);
+  }
   return todos;
 };
 
@@ -135,8 +173,6 @@ const handleDrop = async (e) => {
     writable.write(fileContent);
     writable.close();
   });
-
-  console.log(fileContent);
 
   drawTodos();
 };
