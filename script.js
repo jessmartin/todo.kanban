@@ -120,14 +120,14 @@ const handleDrop = async (e) => {
     e.target.children[1].appendChild(draggingItem);
     e.target.classList.remove('over');
 
-    fileContentArr[lineNumber - 1] = fileContentArr[lineNumber - 1].replace(`- [ ]`, `- [x]`);
+    fileContentArr[lineNumber - 1] = fileContentArr[lineNumber - 1].replace(`[ ]`, `[x]`);
   } else if (e.target.id === 'todoDrop' && draggingItem.classList.contains('done')) {
     // move the todo item to the todo list
     draggingItem.parentElement.removeChild(draggingItem);
     e.target.children[1].appendChild(draggingItem);
     e.target.classList.remove('over');
 
-    fileContentArr[lineNumber - 1] = fileContentArr[lineNumber - 1].replace(`- [x]`, `- [ ]`);
+    fileContentArr[lineNumber - 1] = fileContentArr[lineNumber - 1].replace(`[x]`, `[ ]`);
   }
 
   const fileContent = fileContentArr.join(`\n`);
