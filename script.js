@@ -30,23 +30,54 @@ const drawTodos = async () => {
 
   fileContents.value = JSON.stringify(mdAst, null, 2);
 
-  const lists = mdAst.children.filter((node) => node.type === 'list');
-  lists.forEach((list) => {
-    list.children.forEach((item) => {
-      const listItem = document.createElement('li');
-      listItem.draggable = true;
-      listItem.textContent = item.children[0].children[0].value;
-      listItem.addEventListener('dragstart', dragStart);
-      listItem.addEventListener('dragend', dragEnd);
-      listItem.addEventListener('drop', handleDrop);
-      if (item.checked) {
-        doneList.appendChild(listItem);
-        listItem.classList.add('done')
-      } else {
-        todoList.appendChild(listItem);
-      }
-    });
+  const todos = getAllTodos(mdAst);
+  todos.forEach((item) => {
+    console.log(item);
+    const listItem = document.createElement('li');
+    listItem.draggable = true;
+    listItem.textContent = item.children[0].children[0].value;
+    listItem.addEventListener('dragstart', dragStart);
+    listItem.addEventListener('dragend', dragEnd);
+    listItem.addEventListener('drop', handleDrop);
+    // add the line number to the todo item so that we can find the todo later
+    listItem.dataset.lineNumber = item.position.start.line;
+    if (item.checked) {
+      listItem.classList.add('done')
+      doneList.appendChild(listItem);
+    } else {
+      todoList.appendChild(listItem);
+    }
   });
+
+  const headings = getAllHeadings(mdAst);
+
+};
+
+const getAllHeadings = (mdAst) => {
+  const headings = [];
+  mdAst.children.forEach((node) => {
+    if (node.type === 'heading') {
+      headings.push(node);
+    }
+  });
+  return headings;
+};
+
+// recursively find all the todo items in the markdown AST
+const getAllTodos = (mdAst) => {
+  const todos = [];
+  const findTodos = (node) => {
+    if (node.type === 'listItem') {
+      if (node.checked !== null) {
+        todos.push(node);
+      }
+    }
+    if (node.children) {
+      node.children.forEach(findTodos);
+    }
+  }
+  mdAst.children.forEach(findTodos);
+  return todos;
 };
 
 let draggingItem;
@@ -77,62 +108,37 @@ const dragOver = (e) => {
   e.preventDefault();
 };
 
-const handleDrop = (e) => {
+const handleDrop = async (e) => {
   e.stopPropagation();
 
+  const contents = await file.text();
+  let fileContentArr = contents.split(`\n`);
+  const lineNumber = draggingItem.dataset.lineNumber;
   if (e.target.id === 'doneDrop' && !draggingItem.classList.contains('done')) {
+    // move the todo item to the done list
     draggingItem.parentElement.removeChild(draggingItem);
     e.target.children[1].appendChild(draggingItem);
     e.target.classList.remove('over');
 
-    // Update the AST
-    const lists = mdAst.children.filter((node) => node.type === 'list');
-    lists.forEach((list) => {
-      list.children.forEach((item) => {
-        if (item.children[0].children[0].value === draggingItem.textContent) {
-          item.checked = true;
-        }
-      });
-    });
-    // turn the mdAst back into markdown using remark-stringify
-    let markdown = unified()
-      .use(remarkGfm)
-      .use(remarkStringify)
-      .stringify(mdAst);
-
-    // write the markdown back to the file
-    fileHandle.createWritable().then((writable) => {
-      writable.write(markdown);
-      writable.close();
-    });
-
+    fileContentArr[lineNumber - 1] = fileContentArr[lineNumber - 1].replace(`- [ ]`, `- [x]`);
   } else if (e.target.id === 'todoDrop' && draggingItem.classList.contains('done')) {
+    // move the todo item to the todo list
     draggingItem.parentElement.removeChild(draggingItem);
     e.target.children[1].appendChild(draggingItem);
     e.target.classList.remove('over');
 
-    // Update the AST
-    const lists = mdAst.children.filter((node) => node.type === 'list');
-    lists.forEach((list) => {
-      list.children.forEach((item) => {
-        if (item.children[0].children[0].value === draggingItem.textContent) {
-          item.checked = false;
-        }
-      });
-    });
-    // turn the mdAst back into markdown using remark-stringify
-    let markdown = unified()
-      .use(remarkGfm)
-      .use(remarkStringify)
-      .stringify(mdAst);
-
-    // write the markdown back to the file
-    fileHandle.createWritable().then((writable) => {
-      writable.write(markdown);
-      writable.close();
-    });
+    fileContentArr[lineNumber - 1] = fileContentArr[lineNumber - 1].replace(`- [x]`, `- [ ]`);
   }
-  return false;
+
+  const fileContent = fileContentArr.join(`\n`);
+  fileHandle.createWritable().then((writable) => {
+    writable.write(fileContent);
+    writable.close();
+  });
+
+  console.log(fileContent);
+
+  drawTodos();
 };
 
 todoDrop.addEventListener('dragenter', dragEnter);
