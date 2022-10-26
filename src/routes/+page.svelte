@@ -1,8 +1,12 @@
 <script>
+	// @ts-nocheck
+
 	import { fileOpen } from 'browser-fs-access';
 	import { unified } from 'unified';
 	import remarkParse from 'remark-parse';
 	import remarkGfm from 'remark-gfm';
+
+	import { dndzone } from 'svelte-dnd-action';
 
 	let fileContents = '';
 	let fileLastModified = 0;
@@ -25,12 +29,30 @@
 	};
 
 	let allTodos = [];
+	let todoTodos = [];
+	let doneTodos = [];
 	const parseTodos = async () => {
 		let mdAst = await unified().use(remarkGfm).use(remarkParse).parse(fileContents);
 
 		allTodos = getAllTodos(mdAst);
+		todoTodos = [];
+		doneTodos = [];
 
-		console.log(allTodos);
+		allTodos.forEach((todo) => {
+			if (todo.checked) {
+				doneTodos.push({
+					id: todo.position.start.line,
+					name: todo.children[0].children[0].value,
+					checked: todo.checked
+				});
+			} else {
+				todoTodos.push({
+					id: todo.position.start.line,
+					name: todo.children[0].children[0].value,
+					checked: todo.checked
+				});
+			}
+		});
 	};
 
 	const getAllTodos = (mdAst) => {
@@ -48,34 +70,59 @@
 		mdAst.children.forEach(findTodos);
 		return todos;
 	};
+
+	const todoDropConsider = (e) => (todoTodos = e.detail.items);
+	const todoDropFinalize = (e) => {
+		todoTodos = e.detail.items;
+	};
+	const doneDropConsider = (e) => (doneTodos = e.detail.items);
+	const doneDropFinalize = (e) => {
+		doneTodos = e.detail.items;
+	};
 </script>
 
-<button on:click={openFilePicker} id="butOpenFile">Open File</button>
+<button class="bg-white rounded py-1 px-2 mb-2" on:click={openFilePicker} id="butOpenFile"
+	>Open File</button
+>
 
 <div class="board grid grid-cols-2 flex">
 	<div class="lane rounded bg-slate-100 py-1 px-2 mr-2">
 		<h1 class="font-semibold">Todo</h1>
-		<ul>
-			{#each allTodos as todo}
-				{#if !todo.checked}
-					<li class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
-						{todo.children[0].children[0].value}
-					</li>
-				{/if}
+		<section
+			use:dndzone={{
+				items: todoTodos,
+				centreDraggedOnCursor: true,
+				dropTargetClasses: ['bg-slate-200', 'rounded'],
+				dropTargetStyle: {}
+			}}
+			on:consider={todoDropConsider}
+			on:finalize={todoDropFinalize}
+		>
+			{#each todoTodos as todo (todo.id)}
+				<div class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
+					{todo.name}
+				</div>
 			{/each}
-		</ul>
+		</section>
 	</div>
 
-	<div class="lane rounded bg-slate-100 py-1 px-2 mr-2">
+	<div class="lane rounded bg-slate-100 py-1 px-2">
 		<h1 class="font-semibold">Done</h1>
-		<ul>
-			{#each allTodos as todo}
-				{#if todo.checked}
-					<li class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
-						{todo.children[0].children[0].value}
-					</li>
-				{/if}
+		<section
+			use:dndzone={{
+				items: doneTodos,
+				centreDraggedOnCursor: true,
+				dropTargetClasses: ['bg-slate-200', 'rounded'],
+				dropTargetStyle: {}
+			}}
+			on:consider={doneDropConsider}
+			on:finalize={doneDropFinalize}
+		>
+			{#each doneTodos as todo (todo.id)}
+				<div class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
+					{todo.name}
+				</div>
 			{/each}
-		</ul>
+		</section>
 	</div>
 </div>
