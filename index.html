@@ -1,31 +1,13 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>todo.kanban</title>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Svelte</title>
   </head>
-
   <body>
-    <div class="wrapper">
-      <button id="butOpenFile">Open File</button>
-
-      <textarea id="fileContents" rows="30" cols="50" hidden></textarea>
-
-      <div class="board">
-        <div id="todoDrop" class="drop-zone">
-          <h1>Todo</h1>
-          <ul id="todoList" class="lane"></ul>
-        </div>
-
-        <div id="doneDrop" class="drop-zone">
-          <h1>Done</h1>
-          <ul id="doneList" class="lane"></ul>
-        </div>
-      </div>
-
-      <script type="module" src="script.js"></script>
-    </div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
