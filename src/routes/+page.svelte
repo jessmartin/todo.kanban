@@ -12,7 +12,6 @@
 	let fileLastModified = 0;
 	let handle;
 	const openFilePicker = async () => {
-		console.log('open file clicked');
 		const file = await fileOpen({
 			mimeTypes: ['text/plain']
 		});
@@ -72,8 +71,27 @@
 	};
 
 	const todoDropConsider = (e) => (todoTodos = e.detail.items);
-	const todoDropFinalize = (e) => {
+	const dropFinalize = (e, todoOrDone) => {
+		if (e.detail.info.trigger === 'droppedIntoAnother') return;
 		todoTodos = e.detail.items;
+
+		let fileContentsArr = fileContents.split('\n');
+		const lineNumber = e.detail.info.id;
+		if (todoOrDone === 'todo') {
+			fileContentsArr[lineNumber - 1] = fileContentsArr[lineNumber - 1].replace(`[x]`, `[ ]`);
+		} else if (todoOrDone === 'done') {
+			fileContentsArr[lineNumber - 1] = fileContentsArr[lineNumber - 1].replace(`[ ]`, `[x]`);
+		} else {
+			return;
+		}
+
+		const newFileContent = fileContentsArr.join('\n');
+		handle.createWritable().then((writable) => {
+			writable.write(newFileContent);
+			writable.close();
+		});
+
+		parseTodos();
 	};
 	const doneDropConsider = (e) => (doneTodos = e.detail.items);
 	const doneDropFinalize = (e) => {
@@ -96,7 +114,9 @@
 				dropTargetStyle: {}
 			}}
 			on:consider={todoDropConsider}
-			on:finalize={todoDropFinalize}
+			on:finalize={(e) => {
+				dropFinalize(e, 'todo');
+			}}
 		>
 			{#each todoTodos as todo (todo.id)}
 				<div class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
@@ -116,7 +136,9 @@
 				dropTargetStyle: {}
 			}}
 			on:consider={doneDropConsider}
-			on:finalize={doneDropFinalize}
+			on:finalize={(e) => {
+				dropFinalize(e, 'done');
+			}}
 		>
 			{#each doneTodos as todo (todo.id)}
 				<div class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
