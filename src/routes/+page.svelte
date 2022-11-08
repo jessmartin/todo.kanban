@@ -5,6 +5,8 @@
 	import { unified } from 'unified';
 	import remarkParse from 'remark-parse';
 	import remarkGfm from 'remark-gfm';
+	import { toHast } from 'mdast-util-to-hast';
+	import { toHtml } from 'hast-util-to-html';
 
 	import { dndzone } from 'svelte-dnd-action';
 
@@ -37,17 +39,21 @@
 		todoTodos = [];
 		doneTodos = [];
 
-		allTodos.forEach((todo) => {
+		allTodos.forEach(async (todo) => {
+			const hast = toHast(todo.children[0]);
+			const todoAsHtml = toHtml(hast);
+			console.log(todoAsHtml);
+
 			if (todo.checked) {
 				doneTodos.push({
 					id: todo.position.start.line,
-					name: todo.children[0].children[0].value,
+					name: todoAsHtml,
 					checked: todo.checked
 				});
 			} else {
 				todoTodos.push({
 					id: todo.position.start.line,
-					name: todo.children[0].children[0].value,
+					name: todoAsHtml,
 					checked: todo.checked
 				});
 			}
@@ -120,7 +126,7 @@
 		>
 			{#each todoTodos as todo (todo.id)}
 				<div class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
-					{todo.name}
+					{@html todo.name}
 				</div>
 			{/each}
 		</section>
@@ -142,7 +148,7 @@
 		>
 			{#each doneTodos as todo (todo.id)}
 				<div class="card text-sm bg-white rounded drop-shadow-sm py-1 px-2 mb-2">
-					{todo.name}
+					{@html todo.name}
 				</div>
 			{/each}
 		</section>
