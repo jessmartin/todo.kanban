@@ -3,20 +3,20 @@
 @tailwind utilities;
 
 div.card > p > a {
-	@apply text-blue-500;
-	text-decoration: underline;
+  @apply text-blue-500;
+  text-decoration: underline;
 }
 
 div.card > p > a:hover {
-	@apply text-blue-800;
-	text-decoration: underline;
+  @apply text-blue-800;
+  text-decoration: underline;
 }
 
 div.card > p > a::after {
-	content: '⇱';
-	transform: scale(-1, 1);
-	display: inline-block;
-	margin-left: 3px;
-	font-size: 1.2em;
-	@apply text-gray-500;
+  content: '⇱';
+  transform: scale(-1, 1);
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 1.2em;
+  @apply text-gray-500;
 }
