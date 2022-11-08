@@ -42,18 +42,18 @@
 		allTodos.forEach(async (todo) => {
 			const hast = toHast(todo.children[0]);
 			const todoAsHtml = toHtml(hast);
-			console.log(todoAsHtml);
+			const todoAsHtmlWithTargetBlank = todoAsHtml.replace(/<a/g, '<a target="_blank"');
 
 			if (todo.checked) {
 				doneTodos.push({
 					id: todo.position.start.line,
-					name: todoAsHtml,
+					name: todoAsHtmlWithTargetBlank,
 					checked: todo.checked
 				});
 			} else {
 				todoTodos.push({
 					id: todo.position.start.line,
-					name: todoAsHtml,
+					name: todoAsHtmlWithTargetBlank,
 					checked: todo.checked
 				});
 			}
